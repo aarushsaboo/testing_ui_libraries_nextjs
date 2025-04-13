@@ -2,68 +2,58 @@
 
 import { createContext, useContext, useEffect, useState } from "react"
 
-// Create context to hold our UI framework and theme state
 const ThemeContext = createContext()
 
-export const UI_FRAMEWORKS = {
-  SHADCN: "shadcn",
-  DAISYUI: "daisyui",
-}
-
-export const THEMES = {
-  LIGHT: "light",
-  DARK: "dark",
-  VALENTINE: "valentine",
-}
+// Available DaisyUI themes
+export const DAISYUI_THEMES = [
+  "default",
+  "retro",
+  "cyberpunk",
+  "valentine",
+  "aqua",
+]
 
 export function ThemeProvider({ children }) {
-  const [uiFramework, setUiFramework] = useState(UI_FRAMEWORKS.SHADCN)
-  const [theme, setTheme] = useState(THEMES.LIGHT)
+  // For shadcn theme (light/dark)
+  const [shadcnTheme, setShadcnTheme] = useState("light")
 
-  // Apply theme when it changes
+  // For DaisyUI theme
+  const [daisyTheme, setDaisyTheme] = useState("default")
+
+  // Apply shadcn theme when it changes
   useEffect(() => {
     const root = window.document.documentElement
 
-    // Remove all potential theme classes
-    root.classList.remove("light", "dark", "valentine")
-
-    // Handle shadcn themes
-    if (uiFramework === UI_FRAMEWORKS.SHADCN) {
-      // shadcn uses the class 'dark' for dark mode, otherwise light
-      if (theme === THEMES.DARK) {
-        root.classList.add("dark")
-      }
+    if (shadcnTheme === "dark") {
+      root.classList.add("dark")
+    } else {
+      root.classList.remove("dark")
     }
-    // Handle daisyUI themes
-    else if (uiFramework === UI_FRAMEWORKS.DAISYUI) {
-      // daisyUI uses data-theme attribute
-      root.setAttribute("data-theme", theme)
-    }
-  }, [uiFramework, theme])
+  }, [shadcnTheme])
 
-  const toggleUiFramework = () => {
-    setUiFramework((prev) =>
-      prev === UI_FRAMEWORKS.SHADCN
-        ? UI_FRAMEWORKS.DAISYUI
-        : UI_FRAMEWORKS.SHADCN
-    )
+  // Apply DaisyUI theme when it changes
+  useEffect(() => {
+    const root = window.document.documentElement
+    root.setAttribute("data-theme", daisyTheme)
+  }, [daisyTheme])
+
+  // Toggle shadcn theme between light and dark
+  const toggleShadcnTheme = () => {
+    setShadcnTheme((prev) => (prev === "light" ? "dark" : "light"))
   }
 
-  const setNextTheme = () => {
-    setTheme((prev) => {
-      if (prev === THEMES.LIGHT) return THEMES.DARK
-      if (prev === THEMES.DARK) return THEMES.VALENTINE
-      return THEMES.LIGHT
-    })
+  // Set specific DaisyUI theme
+  const setDaisyUiTheme = (theme) => {
+    setDaisyTheme(theme)
   }
 
   return (
     <ThemeContext.Provider
       value={{
-        uiFramework,
-        theme,
-        toggleUiFramework,
-        setNextTheme,
+        shadcnTheme,
+        daisyTheme,
+        toggleShadcnTheme,
+        setDaisyUiTheme,
       }}
     >
       {children}
@@ -71,4 +61,5 @@ export function ThemeProvider({ children }) {
   )
 }
 
+// Hook to use theme context
 export const useTheme = () => useContext(ThemeContext)
